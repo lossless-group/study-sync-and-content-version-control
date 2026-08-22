@@ -3,7 +3,7 @@ name: Seafile Profile
 slug: seafile
 upstream: https://github.com/haiwen/seafile
 upstream_secondary: https://github.com/haiwen/seafile-server
-pinned_sha: 2ebf6ac8 (seafile, v9.0.21, 2026-08-07) · 8c47d5f (seafile-server, 2026-08-11)
+pinned_sha: 2ebf6ac8 (seafile, v9.0.21, 2026-08-07) · 8c47d5f (seafile-server, v13.0.15-server+32, 2026-08-11)
 license: GPLv2 (client/daemon) · AGPLv3 (server) — both with an OpenSSL linking exception
 maintainer: haiwen (Seafile Ltd.) — open-core; Community Edition here, Professional Edition closed
 study: studies/sync-and-content-version-control
@@ -47,7 +47,7 @@ publish: true
 
 # Seafile — Profile
 
-A profile of Seafile Community Edition as it lives in this study, pinned across two repos: `seafile/` (the client daemon and CLI, `2ebf6ac8`, v9.0.21, 2026-08-07) and `seafile-server/` (`8c47d5f`, 2026-08-11). Both are needed — the object model is duplicated across them and the server carries the Go fileserver where the storage seam lives.
+A profile of Seafile Community Edition as it lives in this study, pinned across two repos: `seafile/` (the client daemon and CLI, `2ebf6ac8`, v9.0.21, 2026-08-07) and `seafile-server/` (`8c47d5f`, nearest tag `v13.0.15-server`, 2026-08-11). Both are needed — the object model is duplicated across them and the server carries the Go fileserver where the storage seam lives.
 
 **Why two repos and why this one first.** Seafile is the closest existing system to the ask that opened this study — *per-directory sync, blob storage underneath, real version history, non-technical users on the other end*. It is also the system reached indirectly: the [seasync](https://github.com/seasync) org that prompted the search publishes **unofficial Seafile clients** (Android/Kotlin, a macOS menubar app). There is no separate "seasync" engine. Anyone arriving at seasync has arrived at Seafile, which the 2026-07-08 exploration already evaluated and passed over — so this profile exists to make that pass-over an informed one rather than a repeat.
 
@@ -121,7 +121,7 @@ This is **rename-and-keep-both**, the same family as Syncthing's `.sync-conflict
 
 Three separately-built C/Go/Python components (`seaf-daemon`, `seafile-controller`, `fileserver`, `notification-server`, Seahub/Django), a MySQL or SQLite database, and a data directory. Platform-specific filesystem watchers written by hand — `wt-monitor-macos.c` (FSEvents), `wt-monitor-linux.c` (inotify), `wt-monitor-win32.c`. The daemon is GPLv2; the server is AGPLv3, which is worth flagging for anything hosted.
 
-Also worth flagging: `seafile-server/configure.ac:5` still declares `AC_INIT([seafile], [6.0.1])` while the client declares `9.0.21`. Version strings in this project are not a reliable signal; use commit dates.
+Also worth flagging: `seafile-server/configure.ac:5` still declares `AC_INIT([seafile], [6.0.1])` while the client declares `9.0.21` and the server's own nearest tag is `v13.0.15-server`. Build-file version strings in this project are not a reliable signal; use tags and commit dates.
 
 ## How it scores against the study checklist
 
