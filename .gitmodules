@@ -22,3 +22,6 @@
 [submodule "rclone-ui"]
 	path = rclone-ui
 	url = https://github.com/rclone-ui/rclone-ui.git
+[submodule "git-annex"]
+	path = git-annex
+	url = https://git.joeyh.name/git/git-annex.git

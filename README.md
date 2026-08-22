@@ -72,6 +72,7 @@ Apply to every entry:
 | History only, with the legibility layer — a description on every snapshot and policies that inherit per directory | [Kopia](./kopia) |
 | History in the document — CRDT merge, so concurrent edits have an answer instead of a second filename | [Automerge](./automerge) |
 | A *surface*, not an engine — the GUI over rclone, and the only entry that solves running-on-a-schedule cross-platform | [Rclone UI](./rclone-ui) |
+| Content is *optional* — pointers in git, bytes fetched on demand, with the bookkeeping that makes deleting them safe | [git-annex](./git-annex) |
 
 ## The checklist, filled in
 
@@ -285,6 +286,32 @@ has to hand over the file.
 
 Deep write-up: [`context-v/profiles/Profile__Rclone-UI.md`](./context-v/profiles/Profile__Rclone-UI.md)
 
+### [git-annex](./git-annex)
+
+Large-file manager layered on git. Haskell, AGPL-3+. Pinned `6bc17908` (nearest
+tag `10.20260717`, 2026-08-21). Upstream: `https://git.joeyh.name/git/git-annex.git`
+— **no GitHub mirror exists.** By Joey Hess.
+
+**Why it's here: the study's own trigger fired.** The list below said to add it
+*"if the binary-sibling problem (PDFs in a corpus) turns out to be the hard
+part."* It did — a corpus is 1,715 text files and 78 binaries, and **the binaries
+are 90.5% of the bytes.** They broke jj via LFS, they dominate sync cost, and
+they are why a 4-year-old laptop is a constraint.
+
+**The thing to read it for.** `doc/git-annex-drop.mdwn:25-36` — it verifies a
+copy exists elsewhere *before* deleting locally, and says so when it won't.
+`numcopies` is the piece an in-house design skips and regrets. Then
+`doc/internals.mdwn:62-95`: location tracking lives in an orphan branch whose
+files are **"designed to be auto-merged by simply concatenating them together"**,
+each line timestamped. That is a CRDT in a text file, solving multi-peer metadata
+merge without a CRDT library.
+
+**Why read rather than adopt.** Its symlink mechanics leak, it is Haskell, and
+`CorpusStore.exists()` + `stat()` already provide the verification primitive
+git-annex builds by hand.
+
+Deep write-up: [`context-v/profiles/Profile__Git-Annex.md`](./context-v/profiles/Profile__Git-Annex.md)
+
 
 ## Not in the study, and why
 
@@ -298,6 +325,7 @@ Deep write-up: [`context-v/profiles/Profile__Rclone-UI.md`](./context-v/profiles
 - **automerge-repo** — where Automerge's storage and network adapters live. Not
   pinned because the CRDT question is answered without it; pin it the moment the
   v3 tier is reopened.
-- **git-annex, DVC, Perkeep, ostree** — real prior art on content-addressed
-  large-file storage. Held back to keep the question narrow; add them if the
-  binary-sibling problem (PDFs in a corpus) turns out to be the hard part.
+- ~~**git-annex**~~ — **pinned 2026-08-22**; the trigger below fired.
+- **DVC, Perkeep, ostree** — further prior art on content-addressed large-file
+  storage. Still held back; git-annex covers the model, and a second example
+  would restate rather than extend it.
