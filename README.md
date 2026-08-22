@@ -70,6 +70,7 @@ Apply to every entry:
 | Transport only — peer-to-peer, no server, no store, structural asymmetry via four folder types | [Syncthing](./syncthing) |
 | History only — write-once content-addressed snapshots natively into a bucket, no sync, no UI | [restic](./restic) |
 | History only, with the legibility layer — a description on every snapshot and policies that inherit per directory | [Kopia](./kopia) |
+| History in the document — CRDT merge, so concurrent edits have an answer instead of a second filename | [Automerge](./automerge) |
 
 ## In the study now
 
@@ -189,6 +190,32 @@ holds packed encrypted contents rather than a plain markdown tree.
 
 Deep write-up: [`context-v/profiles/Profile__Kopia.md`](./context-v/profiles/Profile__Kopia.md)
 
+### [Automerge](./automerge)
+
+CRDT library — Rust core with WASM/JS and C bindings, MIT. Pinned `47908d6c`
+(nearest tag `js/automerge-3.4.1`, 2026-08-17). Upstream:
+<https://github.com/automerge/automerge>, from Ink & Switch.
+
+**Why it's here.** To make `flave-ai`'s §8.4 v3 deferral a decision rather than an
+omission, and because it is the **only entry in this study where two people
+editing the same paragraph has a defined answer.** Every other entry resolves a
+conflict by renaming and keeping both.
+
+**The thing to read it for.** `src/transaction/commit.rs:3-8` and
+`src/change.rs:47-93` — history as a DAG of authored, timestamped, optionally
+captioned changes. Then `automerge.rs:1318`: `diff(before_heads, after_heads) ->
+Vec<Patch>`, which is *structured* change data and the best raw material in the
+study for a progress feed.
+
+**What it costs.** A document is a `Map`/`List`/`Text` object graph, not a
+directory — so `rg`, Obsidian, rclone, and every agent that reads files stop
+working without an export step. And there is **no truncate, compact, or GC
+anywhere in the API**: full history is retained by construction, which is what
+makes the merge guarantees hold. Storage and network adapters are not even in
+this repo; they live in [automerge-repo](https://github.com/automerge/automerge-repo).
+
+Deep write-up: [`context-v/profiles/Profile__Automerge.md`](./context-v/profiles/Profile__Automerge.md)
+
 
 ## Not in the study, and why
 
@@ -199,6 +226,9 @@ Deep write-up: [`context-v/profiles/Profile__Kopia.md`](./context-v/profiles/Pro
   study is measured against, not the implementation evidence.
 - **Yjs** — Automerge is pinned as the CRDT data point; Yjs is the same bet with a
   different encoding. Pin it too only if the CRDT tier stops being deferred.
+- **automerge-repo** — where Automerge's storage and network adapters live. Not
+  pinned because the CRDT question is answered without it; pin it the moment the
+  v3 tier is reopened.
 - **git-annex, DVC, Perkeep, ostree** — real prior art on content-addressed
   large-file storage. Held back to keep the question narrow; add them if the
   binary-sibling problem (PDFs in a corpus) turns out to be the hard part.
