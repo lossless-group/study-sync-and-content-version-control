@@ -19,7 +19,7 @@ authors:
   - Michael Staton
 augmented_with:
   - Claude Code on Claude Opus 5 (1M context)
-at_semantic_version: 0.0.0.1
+at_semantic_version: 0.0.0.2
 status: Draft
 site_uuid: 3216cd55-a2b8-4971-9355-60a963460599
 hex_code: 9u06dv
@@ -176,14 +176,23 @@ So on the study's central question — *at which layer does history live* — th
 entry answers **nowhere**, exactly like [[Profile__Syncthing]], and for the same
 reason: it is transport, and transport does not keep history.
 
-**The UI layer is React**, with HeroUI and Tailwind. Per the `astro-knots` hard
-prohibitions that code is not liftable into the tree. The **Rust** half is, and
-it is the half worth reading.
+**The UI layer is React**, with HeroUI and Tailwind. React is a hard prohibition
+across the tree, so **none of the front end is liftable**. The **Rust** half is,
+and it is the half worth reading. Treat `src/` and `lib/` as illustration of what
+the Rust exposes, not as source to borrow.
 
-Also notable and mildly relevant: it embeds document viewers — `@embedpdf/*` for
-PDF, `@extend-ai/react-docx|pptx|xlsx` for Office formats. A corpus is 41 binaries
-alongside its markdown, and "let a client look at the PDF" is a real requirement
-those libraries address. Names to remember, not code to copy.
+**The embedded document viewers are a non-finding.** It bundles `@embedpdf/*` for
+PDF and `@extend-ai/react-docx|pptx|xlsx` for Office formats. Tempting to note as
+useful for a corpus that carries 41 binaries — but it solves a problem a
+client-facing surface does not have. **A reader already owns viewers.** A PDF
+link opens in the browser's native viewer; a `.docx` or `.xlsx` downloads and
+opens in whatever the reader already uses. Building an in-app viewer to avoid a
+download is effort spent on a step nobody objects to, and it drags a heavy render
+dependency into a surface whose whole job is to be light.
+
+The reason this app has them is that it is a **desktop file manager** — the user
+is browsing remote storage and wants to look without downloading. That is a
+genuinely different product from a change feed.
 
 ## How it scores against the study checklist
 

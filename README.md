@@ -279,7 +279,9 @@ kind of detail a study exists to pin.
 **What it does not have.** No file version history at all — and
 `lib/rclone/versions.ts` is a false lead, managing *rclone binary* versions, not
 file ones. No `--backup-dir` use anywhere. The UI layer is React, which the tree
-prohibits; the Rust half is the half worth reading.
+prohibits, so only the Rust half is liftable. Its embedded PDF/DOCX/XLSX viewers
+are a non-finding — a reader already owns viewers, and a client-facing feed only
+has to hand over the file.
 
 Deep write-up: [`context-v/profiles/Profile__Rclone-UI.md`](./context-v/profiles/Profile__Rclone-UI.md)
 
