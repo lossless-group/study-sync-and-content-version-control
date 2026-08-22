@@ -69,6 +69,7 @@ Apply to every entry:
 | All three layers in one product — library-scoped commit DAG + CDC blocks + daemon + web UI; S3 behind the paid tier | [Seafile](./seafile) |
 | Transport only — peer-to-peer, no server, no store, structural asymmetry via four folder types | [Syncthing](./syncthing) |
 | History only — write-once content-addressed snapshots natively into a bucket, no sync, no UI | [restic](./restic) |
+| History only, with the legibility layer — a description on every snapshot and policies that inherit per directory | [Kopia](./kopia) |
 
 ## In the study now
 
@@ -162,6 +163,31 @@ so constraint 1 (files-as-truth, hand-recoverable) does not survive. And
 which is the one field the make-progress-visible goal actually needs.
 
 Deep write-up: [`context-v/profiles/Profile__Restic.md`](./context-v/profiles/Profile__Restic.md)
+
+### [Kopia](./kopia)
+
+Content-addressed snapshots with a per-directory policy tree, Go, Apache-2.0.
+Pinned `4ebb2be6` (nearest tag `v0.23.1`, 2026-08-21). Upstream:
+<https://github.com/kopia/kopia>.
+
+**Why it's here.** Read immediately after restic: same bet, and the differences
+land exactly where this study's question is. Kopia's `snapshot.Manifest` has the
+**`Description`** field restic has no equivalent for, plus key-value `Tags`,
+manual `Pins` that hold a snapshot out of expiry, and `RetentionReasons`
+explaining why one survived. And its policies — retention, compression, file
+selection, chunking algorithm, before/after hooks — **attach per directory and
+inherit**, which is the literal shape of "per-dir sync with version control."
+
+**The thing to read it for.** `snapshot/manifest.go:18-40` against restic's
+`internal/data/snapshot.go:17-34`. Then `snapshot/policy/`, where every effective
+policy field records *which level supplied it*. Then
+`repo/blob/readonly/readonly_storage.go` — structural read-only one layer below
+where Syncthing and Seafile put it.
+
+**Where it stops.** Same two walls as restic: it does not sync, and the bucket
+holds packed encrypted contents rather than a plain markdown tree.
+
+Deep write-up: [`context-v/profiles/Profile__Kopia.md`](./context-v/profiles/Profile__Kopia.md)
 
 
 ## Not in the study, and why

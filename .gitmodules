@@ -13,3 +13,6 @@
 [submodule "restic"]
 	path = restic
 	url = https://github.com/restic/restic.git
+[submodule "kopia"]
+	path = kopia
+	url = https://github.com/kopia/kopia.git
