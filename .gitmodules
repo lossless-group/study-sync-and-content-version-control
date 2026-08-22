@@ -19,3 +19,6 @@
 [submodule "automerge"]
 	path = automerge
 	url = https://github.com/automerge/automerge.git
+[submodule "rclone-ui"]
+	path = rclone-ui
+	url = https://github.com/rclone-ui/rclone-ui.git

@@ -71,27 +71,32 @@ Apply to every entry:
 | History only — write-once content-addressed snapshots natively into a bucket, no sync, no UI | [restic](./restic) |
 | History only, with the legibility layer — a description on every snapshot and policies that inherit per directory | [Kopia](./kopia) |
 | History in the document — CRDT merge, so concurrent edits have an answer instead of a second filename | [Automerge](./automerge) |
+| A *surface*, not an engine — the GUI over rclone, and the only entry that solves running-on-a-schedule cross-platform | [Rclone UI](./rclone-ui) |
 
 ## The checklist, filled in
 
 Index only — the interpretation lives in
 `ai-labs/context-v/explorations/A-Syncbox-For-Client-Document-Folders.md`.
 
-| | jj | Seafile | Syncthing | restic | Kopia | Automerge |
-|---|---|---|---|---|---|---|
-| **Unit** | repo | library | folder | repo | **directory** | document |
-| **History lives in** | VCS | store | *(local archive)* | store | store | document |
-| **Content-addressed** | yes | yes + CDC | transfer only | yes + CDC | yes + CDC | changes only |
-| **Native S3/R2** | no | **Pro only** | impossible | **yes** | **yes** | not in repo |
-| **Needs object versioning** | n/a | no | n/a | **no** | **no** | n/a |
-| **Conflicts** | recorded, first-class | rename-both | rename-both | n/a | n/a | **merged** |
-| **Structural read-only** | no | server-side | folder type | credential | **storage wrapper** | protocol hint |
-| **Plain files on disk** | **yes** | client only | **yes** | no | no | **no** |
-| **Human reason per version** | commit desc | **`Commit.Desc`** | **none** | **none** | **`Description`** | change `message` |
-| **Retention policy** | manual `gc` | per-library days | thinning curve | `ExpirePolicy` | **per-dir + pins** | **none possible** |
-| **Ops cost** | one binary | **server + DB + web** | one binary | one binary | binary (+server) | library + glue |
+| | jj | Seafile | Syncthing | restic | Kopia | Automerge | Rclone UI |
+|---|---|---|---|---|---|---|---|
+| **Unit** | repo | library | folder | repo | **directory** | document | rclone path pair |
+| **History lives in** | VCS | store | *(local archive)* | store | store | document | **nowhere** |
+| **Content-addressed** | yes | yes + CDC | transfer only | yes + CDC | yes + CDC | changes only | inherits rclone |
+| **Native S3/R2** | no | **Pro only** | impossible | **yes** | **yes** | not in repo | **yes, all backends** |
+| **Needs object versioning** | n/a | no | n/a | **no** | **no** | n/a | n/a |
+| **Conflicts** | recorded, first-class | rename-both | rename-both | n/a | n/a | **merged** | surfaces bisync's |
+| **Structural read-only** | no | server-side | folder type | credential | **storage wrapper** | protocol hint | not modelled |
+| **Plain files on disk** | **yes** | client only | **yes** | no | no | **no** | **yes** |
+| **Human reason per version** | commit desc | **`Commit.Desc`** | **none** | **none** | **`Description`** | change `message` | **none** |
+| **Retention policy** | manual `gc` | per-library days | thinning curve | `ExpirePolicy` | **per-dir + pins** | **none possible** | log rotation only |
+| **Ops cost** | one binary | **server + DB + web** | one binary | one binary | binary (+server) | library + glue | desktop app |
 
 Bold marks where an entry is the outlier — best or worst — on that row.
+
+**Rclone UI is a surface over a transport, so most rows read as rclone's.** It is pinned
+for one row the others do not have — see its entry — and for correcting the claim that
+rclone cannot run as a service.
 
 **Nothing in the table does all three layers on a bucket.** The two entries that
 speak S3 natively (restic, Kopia) do not sync and do not leave a plain tree. The
@@ -242,6 +247,41 @@ makes the merge guarantees hold. Storage and network adapters are not even in
 this repo; they live in [automerge-repo](https://github.com/automerge/automerge-repo).
 
 Deep write-up: [`context-v/profiles/Profile__Automerge.md`](./context-v/profiles/Profile__Automerge.md)
+
+### [Rclone UI](./rclone-ui)
+
+Desktop GUI over rclone. Tauri + React + Rust, Apache-2.0. Pinned `da6e134`
+(v3.7.3, 2026-08-21). Upstream: <https://github.com/rclone-ui/rclone-ui> ·
+<https://rcloneui.com/>.
+
+**Why it's here, and it's different from the rest.** Every other entry is an
+engine; this is a *surface* over one. It earns the pin for two things nothing
+else in the study supplies.
+
+**One: it corrects the record on rclone.** rclone has a full HTTP remote-control
+daemon (`rclone rcd`) and this app is built entirely on it —
+`/core/stats`, `/core/transferred`, `/job/status`, `/job/batch`, `/sync/sync`,
+`/sync/bisync`. The 2026-08-22 exploration claimed rclone was batch-only. That is
+true of *watching* and wrong about running as a service. `/core/transferred`
+is a per-item record of what moved, grouped by job — a change record for the
+transport layer, ready-made.
+
+**Two: `src-tauri/src/scheduler/` is 5,167 lines solving "run this on a schedule,
+cross-platform."** A `SchedulerBackend` trait with four backends — per-user
+**LaunchAgents** on macOS user-mode, **crontab** for Linux and macOS system-mode,
+**Task Scheduler** via `schtasks.exe` on Windows — plus append-only JSONL run
+history and an `interrupted` flag *synthesized* from a started event with no
+finished one. That last bit is the cheapest available answer to "did my
+automation quietly die." Read `launchd.rs:1-12` first: it explains the TCC and
+Keychain reasoning for choosing a LaunchAgent over cron, which is precisely the
+kind of detail a study exists to pin.
+
+**What it does not have.** No file version history at all — and
+`lib/rclone/versions.ts` is a false lead, managing *rclone binary* versions, not
+file ones. No `--backup-dir` use anywhere. The UI layer is React, which the tree
+prohibits; the Rust half is the half worth reading.
+
+Deep write-up: [`context-v/profiles/Profile__Rclone-UI.md`](./context-v/profiles/Profile__Rclone-UI.md)
 
 
 ## Not in the study, and why
