@@ -67,6 +67,7 @@ Apply to every entry:
 |---|---|
 | History in the VCS — five pluggable stores, cloud-shaped traits, no cloud implementation | [jj (Jujutsu)](./jj) |
 | All three layers in one product — library-scoped commit DAG + CDC blocks + daemon + web UI; S3 behind the paid tier | [Seafile](./seafile) |
+| Transport only — peer-to-peer, no server, no store, structural asymmetry via four folder types | [Syncthing](./syncthing) |
 
 ## In the study now
 
@@ -112,6 +113,30 @@ that show a clean four-method storage seam with **exactly one open-source
 implementation** — the S3 backend is Professional.
 
 Deep write-up: [`context-v/profiles/Profile__Seafile.md`](./context-v/profiles/Profile__Seafile.md)
+
+### [Syncthing](./syncthing)
+
+Peer-to-peer continuous file sync, Go, MPL-2.0. Pinned `38ac58c8` (nearest tag
+`v2.1.4-rc.1`, 2026-08-20). Upstream: <https://github.com/syncthing/syncthing>.
+Maintained by the Syncthing Foundation.
+
+**Why it's here.** The Lossless tree has leaned toward it twice without installing
+it, and `augment-it`'s exploration ended with five open questions about it. Pinning
+the source answers two of them outright.
+
+**The thing to read it for.** `lib/model/folder_recvonly.go:29-57` settles whether a
+receive-only device silently orphans a collaborator's edit: **it does not.** The edit
+is flagged `FlagLocalReceiveOnly`, sent outward with an empty Version so nobody is
+told they are behind, counted by the database's per-flag size accounting, and offered
+back as a **Revert**. Also here for `receiveencrypted` — an untrusted always-on device
+holding a replica it cannot read — and for `lib/versioner/staggered.go:49-54`, a
+four-line progressive-thinning retention curve worth stealing outright.
+
+**And what it can never be.** There is no shared history, only a per-device local
+archive of whole-file copies under `.stversions/` carrying no author and no reason.
+A peer is always a daemon on a real machine, so it cannot target a bucket at all.
+
+Deep write-up: [`context-v/profiles/Profile__Syncthing.md`](./context-v/profiles/Profile__Syncthing.md)
 
 
 ## Not in the study, and why

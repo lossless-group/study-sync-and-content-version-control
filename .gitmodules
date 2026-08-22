@@ -7,3 +7,6 @@
 [submodule "seafile-server"]
 	path = seafile-server
 	url = https://github.com/haiwen/seafile-server.git
+[submodule "syncthing"]
+	path = syncthing
+	url = https://github.com/syncthing/syncthing.git
