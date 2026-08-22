@@ -18,7 +18,7 @@ authors:
   - Michael Staton
 augmented_with:
   - Claude Code on Claude Opus 5 (1M context)
-at_semantic_version: 0.0.0.1
+at_semantic_version: 0.0.0.2
 status: Draft
 site_uuid: db950edb-0c90-4a69-a977-59f93ee0d3fe
 hex_code: nyrny9
@@ -128,6 +128,35 @@ So a colocated `.flave` bundle has two halves with different portability:
 
 This does not invalidate the decision. It sharpens it: **`jj` is excellent as a local history engine for a single author, and its interchange story is git's, not its own.** Any sync design must carry `.jj/` deliberately or accept that history is local-only.
 
+### Git LFS: no — and the failure is silent
+
+`docs/git-compatibility.md:72` states it in three words:
+
+> **Git LFS: No.** ([#80](https://github.com/jj-vcs/jj/issues/80))
+
+A grep for `lfs` or `smudge` across the whole source returns nothing: **jj does
+not run git's clean/smudge filters at all.** In an LFS repo, jj's working-copy
+snapshot therefore sees what LFS smudged onto disk — the real file — and stores
+*that*, overwriting the pointer.
+
+**Confirmed the expensive way, 2026-08-22.** `jj git init --colocate` in a client
+corpus repo whose `.gitattributes` carried `*.pdf filter=lfs`. A single `jj
+describe` + `jj new`, touching no files, produced a commit reading `78 updated ·
+282.5 MB` with diffstat lines like `Bin 131 -> 729490 bytes`. That signature — a
+~130-byte binary becoming megabytes — is an LFS pointer being replaced by its own
+content. Reverted; nothing pushed.
+
+Nothing warns you. jj prints "Initialized repo", the commit looks ordinary, and
+`git status` is clean before and after because LFS keeps real bytes on disk by
+design. Only the diffstat gives it away.
+
+This matters for the study's central question in a specific way: **a corpus is
+markdown plus large binaries**, which is precisely why these repos use LFS, and
+precisely the shape jj handles worst. jj's own roadmap has "Better support for
+large files" as future work (`docs/roadmap.md:78`).
+
+Guardrail: `ai-labs/context-v/reminders/Never-Run-JJ-In-A-Git-LFS-Repo.md`.
+
 ### And `.jj/` is the thing you must not blind-sync
 
 The working copy takes a real file lock — `working_copy.lock` via `FileLock::lock` (`lib/src/local_working_copy.rs:2645`, `lib/src/lock/unix.rs:32`) — and `workspace_store` locks with a sibling `.lock` file (`lib/src/workspace_store.rs:112`). The operation log is an append-only DAG whose heads are separate mutable state (`lib/src/op_store.rs:359`, `Operation { view_id, parents, metadata, … }`).
@@ -156,6 +185,7 @@ Single static binary, no daemon, no server. Optional Watchman integration for la
 | **Where history lives** | In the VCS, split across five stores |
 | **Content addressing** | Yes, whole-object. Git backend: SHA-1/SHA-256 per git. SimpleBackend: Blake2b-512 |
 | **Blob-storage story** | **Trait-ready, implementation-absent.** Four traits to write, in Rust, against a fast-moving upstream |
+| **Large binaries** | **Git LFS unsupported.** In an LFS repo jj commits the real bytes over the pointers, silently |
 | **Conflict semantics** | Best in the study — recorded, not blocking. Resolution UI is still yours to build |
 | **Asymmetry** | None structural. Read-only is a remote-permissions matter, not a repo property |
 | **Hand-recoverability** | The working copy is plain files. History needs `jj` (or git, minus change IDs and the op log) |
