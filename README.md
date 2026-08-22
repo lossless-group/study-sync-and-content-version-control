@@ -1,0 +1,83 @@
+# Sync and Content Version Control — Study
+
+## The question
+
+> For a folder of documents shared **bidirectionally** between an operator and a
+> **non-technical** client, backed by **blob storage**, at which layer does
+> history live — the transport, the store, the application, or the document?
+
+The interesting bits are not "which sync tool is fastest." The interesting bit
+is that the ask people actually voice — *"a Dropbox that agents can work in, with
+version history, per directory"* — is **three problems wearing one coat**:
+
+| Layer | The question it answers | Failure if you get it wrong |
+|---|---|---|
+| **Transport** | how bytes get from one machine to another | corruption, silent divergence, orphaned edits |
+| **History** | what did this look like before, and what changed | unbounded storage, or no undo at all |
+| **Legibility** | what changed, why should a human care | you ship sync and still can't show progress |
+
+Every entry below picks a different layer to be opinionated about and inherits
+the other two. Reading them side by side is the point.
+
+## Why this study exists
+
+Three prior explorations in the Lossless tree circled this and none closed:
+
+- `self-host-stack/context-v/explorations/Instantly-Synced-Team-Folder-Nextcloud-vs-Alternatives.md`
+  (2026-07-08) — compared Nextcloud / Syncthing / Seafile, leaned Syncthing, left `Open`.
+  Also flagged the footgun this study keeps running into: **continuously syncing a live
+  `.git` working tree with any file-sync tool is a well-known way to corrupt a repository.**
+- `ai-labs/augment-it/context-v/explorations/Syncthing-For-Collaborator-Access-To-The-Corpus.md`
+  (2026-07-17) — chose asymmetry (`Receive Only` collaborators) precisely to make
+  conflicts structurally impossible. Never built.
+- `ai-labs/corpora-builder/context-v/plans/Corpora-Builder-MVP-R2-Native-With-Checkpoint-History.md`
+  (2026-08-08) — the **HISTORY** decision: R2 has no object versioning, therefore
+  version control must be application-level, therefore *content-addressed objects +
+  checkpoint manifests*. "Git's data model, minus git, on a substrate that has neither."
+
+Six days after HISTORY, `ai-labs/flave-ai/context-v/specs/Master-Flave-An-Agent-Native-Document-Format-and-Publisher.md`
+§8.2 resolved the opposite way for `.flave` documents: **every bundle is a `jj` repo.**
+Two resolved decisions, two repos, six days apart, and one syncbox now expected to
+serve both. **That contradiction is what this study is for.**
+
+## The reading checklist
+
+Apply to every entry:
+
+- **Unit of sync.** File? Directory? Library? Repository? Document? What is the
+  smallest thing that can be shared independently, and can two of them nest?
+- **Where history lives.** In the transport, the store, the app, or the document
+  itself? Can you get history *without* the tool that wrote it?
+- **Content addressing.** Is the store content-addressed? At what granularity —
+  whole file, fixed block, content-defined chunk? What does dedup actually buy?
+- **Blob-storage story.** Can it target S3/R2 *natively*, or does it need a POSIX
+  filesystem and a syncer underneath? Does it need object versioning (R2 has none)?
+- **Conflict semantics.** Merge, rename-and-keep-both, last-writer-wins, refuse,
+  or represent-as-first-class? **What does a non-technical person see?**
+- **Asymmetry.** Can one side be read-only *structurally*, or only by agreement?
+- **Hand-recoverability.** With the tool gone, is the data still plain files a
+  human can open — or is it an opaque pack format needing a restore step?
+- **Labels and legibility.** Can a checkpoint carry a human-written reason? Is
+  there any surface that renders "what changed" for someone who won't read a diff?
+- **Operational cost.** Daemon? Server? Database? Or a single binary against a bucket?
+
+## The design space at a glance
+
+_(populated as entries land)_
+
+## In the study now
+
+_(populated as entries land)_
+
+## Not in the study, and why
+
+- **Nextcloud / ownCloud** — evaluated and passed over in the 2026-07-08
+  exploration; groupware breadth is the opposite of the narrow ask, and its sync
+  leg is the part every source rates weakest.
+- **Dropbox / Google Drive** — closed source. They set the UX expectation this
+  study is measured against, not the implementation evidence.
+- **Yjs** — Automerge is pinned as the CRDT data point; Yjs is the same bet with a
+  different encoding. Pin it too only if the CRDT tier stops being deferred.
+- **git-annex, DVC, Perkeep, ostree** — real prior art on content-addressed
+  large-file storage. Held back to keep the question narrow; add them if the
+  binary-sibling problem (PDFs in a corpus) turns out to be the hard part.
