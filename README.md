@@ -72,6 +72,33 @@ Apply to every entry:
 | History only, with the legibility layer — a description on every snapshot and policies that inherit per directory | [Kopia](./kopia) |
 | History in the document — CRDT merge, so concurrent edits have an answer instead of a second filename | [Automerge](./automerge) |
 
+## The checklist, filled in
+
+Index only — the interpretation lives in
+`ai-labs/context-v/explorations/A-Syncbox-For-Client-Document-Folders.md`.
+
+| | jj | Seafile | Syncthing | restic | Kopia | Automerge |
+|---|---|---|---|---|---|---|
+| **Unit** | repo | library | folder | repo | **directory** | document |
+| **History lives in** | VCS | store | *(local archive)* | store | store | document |
+| **Content-addressed** | yes | yes + CDC | transfer only | yes + CDC | yes + CDC | changes only |
+| **Native S3/R2** | no | **Pro only** | impossible | **yes** | **yes** | not in repo |
+| **Needs object versioning** | n/a | no | n/a | **no** | **no** | n/a |
+| **Conflicts** | recorded, first-class | rename-both | rename-both | n/a | n/a | **merged** |
+| **Structural read-only** | no | server-side | folder type | credential | **storage wrapper** | protocol hint |
+| **Plain files on disk** | **yes** | client only | **yes** | no | no | **no** |
+| **Human reason per version** | commit desc | **`Commit.Desc`** | **none** | **none** | **`Description`** | change `message` |
+| **Retention policy** | manual `gc` | per-library days | thinning curve | `ExpirePolicy` | **per-dir + pins** | **none possible** |
+| **Ops cost** | one binary | **server + DB + web** | one binary | one binary | binary (+server) | library + glue |
+
+Bold marks where an entry is the outlier — best or worst — on that row.
+
+**Nothing in the table does all three layers on a bucket.** The two entries that
+speak S3 natively (restic, Kopia) do not sync and do not leave a plain tree. The
+two that leave a plain tree (jj, Syncthing) cannot reach a bucket. The one that
+does everything (Seafile) puts the bucket behind a paid licence and keeps no plain
+tree server-side. That gap is the finding, not a gap in the reading.
+
 ## In the study now
 
 ### [jj (Jujutsu)](./jj)
