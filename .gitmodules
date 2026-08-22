@@ -10,3 +10,6 @@
 [submodule "syncthing"]
 	path = syncthing
 	url = https://github.com/syncthing/syncthing.git
+[submodule "restic"]
+	path = restic
+	url = https://github.com/restic/restic.git

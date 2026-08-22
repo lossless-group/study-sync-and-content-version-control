@@ -68,6 +68,7 @@ Apply to every entry:
 | History in the VCS — five pluggable stores, cloud-shaped traits, no cloud implementation | [jj (Jujutsu)](./jj) |
 | All three layers in one product — library-scoped commit DAG + CDC blocks + daemon + web UI; S3 behind the paid tier | [Seafile](./seafile) |
 | Transport only — peer-to-peer, no server, no store, structural asymmetry via four folder types | [Syncthing](./syncthing) |
+| History only — write-once content-addressed snapshots natively into a bucket, no sync, no UI | [restic](./restic) |
 
 ## In the study now
 
@@ -137,6 +138,30 @@ archive of whole-file copies under `.stversions/` carrying no author and no reas
 A peer is always a daemon on a real machine, so it cannot target a bucket at all.
 
 Deep write-up: [`context-v/profiles/Profile__Syncthing.md`](./context-v/profiles/Profile__Syncthing.md)
+
+### [restic](./restic)
+
+Content-addressed snapshot backup, Go, BSD-2-Clause. Pinned `a80be147` (nearest
+tag `v0.19.1`, 2026-08-01). Upstream: <https://github.com/restic/restic>.
+
+**Why it's here.** To answer honestly whether `corpora-builder`'s unbuilt Phase 4
+is just restic. The HISTORY decision proposed *"a content-addressed object store
+plus checkpoint manifests… git's data model, minus git."* restic has shipped that
+since 2014, and its layout is `data/<ab>/<sha256>` + `snapshots/<id>` — the same
+scheme, the same two-hex fan-out.
+
+**The thing to read it for.** `doc/design.rst:28-120` next to the HISTORY bucket
+diagram. Then `internal/backend/` — eleven backends including `s3` and `rclone`,
+and **restic needs no object versioning**, which is precisely the R2 gap that
+forced HISTORY in the first place. Then `internal/data/snapshot_policy.go:14-28`,
+a retention grammar where `Tags` can pin a snapshot out of expiry entirely.
+
+**Where it stops.** No browsable `live/` tree — a repository is encrypted packs,
+so constraint 1 (files-as-truth, hand-recoverable) does not survive. And
+`Snapshot` carries `Tags` and computed statistics but **no free-text reason**,
+which is the one field the make-progress-visible goal actually needs.
+
+Deep write-up: [`context-v/profiles/Profile__Restic.md`](./context-v/profiles/Profile__Restic.md)
 
 
 ## Not in the study, and why
