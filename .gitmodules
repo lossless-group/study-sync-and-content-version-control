@@ -1,3 +1,9 @@
 [submodule "jj"]
 	path = jj
 	url = https://github.com/jj-vcs/jj.git
+[submodule "seafile"]
+	path = seafile
+	url = https://github.com/haiwen/seafile.git
+[submodule "seafile-server"]
+	path = seafile-server
+	url = https://github.com/haiwen/seafile-server.git

@@ -66,6 +66,7 @@ Apply to every entry:
 | Bet | Entry |
 |---|---|
 | History in the VCS — five pluggable stores, cloud-shaped traits, no cloud implementation | [jj (Jujutsu)](./jj) |
+| All three layers in one product — library-scoped commit DAG + CDC blocks + daemon + web UI; S3 behind the paid tier | [Seafile](./seafile) |
 
 ## In the study now
 
@@ -89,6 +90,28 @@ half: content in `.git/`, but change IDs, predecessors, and the whole operation
 log in `.jj/` — so a git-only recipient gets the document and loses the undo.
 
 Deep write-up: [`context-v/profiles/Profile__Jujutsu.md`](./context-v/profiles/Profile__Jujutsu.md)
+
+### [Seafile](./seafile) + [seafile-server](./seafile-server)
+
+Two repos, both needed. Client daemon: `2ebf6ac8` (v9.0.21, 2026-08-07), GPLv2.
+Server: `8c47d5f` (2026-08-11), AGPLv3. Upstream: <https://github.com/haiwen/seafile>,
+<https://github.com/haiwen/seafile-server>. Maintained by haiwen (Seafile Ltd.),
+open-core — Community Edition is pinned here, Professional is closed.
+
+**Why it's here.** It is the closest existing system to the question this study
+asks, and it is where the search actually landed: the [seasync](https://github.com/seasync)
+org publishes *unofficial Seafile clients*, not a separate engine. Pinning it makes
+the 2026-07-08 exploration's pass-over an informed one instead of a repeat.
+
+**The thing to read it for.** Git's object model reimplemented — commit → SeafDir →
+Seafile (an ordered list of `block_ids`) → blocks — with Rabin content-defined
+chunking underneath (`common/cdc/cdc.c:25-32`, 1 MiB average). `Commit.Desc` is a
+human-written reason on every version, which is the legibility field the rest of the
+study should be measured against. And `fileserver/objstore/objstore.go` is 56 lines
+that show a clean four-method storage seam with **exactly one open-source
+implementation** — the S3 backend is Professional.
+
+Deep write-up: [`context-v/profiles/Profile__Seafile.md`](./context-v/profiles/Profile__Seafile.md)
 
 
 ## Not in the study, and why
