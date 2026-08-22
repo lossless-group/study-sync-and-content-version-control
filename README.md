@@ -63,11 +63,33 @@ Apply to every entry:
 
 ## The design space at a glance
 
-_(populated as entries land)_
+| Bet | Entry |
+|---|---|
+| History in the VCS — five pluggable stores, cloud-shaped traits, no cloud implementation | [jj (Jujutsu)](./jj) |
 
 ## In the study now
 
-_(populated as entries land)_
+### [jj (Jujutsu)](./jj)
+
+Git-compatible VCS, Rust, Apache-2.0. Pinned `9d905d5` (v0.44.0, 2026-08-21).
+Upstream: <https://github.com/jj-vcs/jj>. Maintained by the `jj-vcs` org;
+originated at Google, now community-governed.
+
+**Why it's here.** `flave-ai`'s spec §8.2 resolved that every `.flave` bundle is
+a `jj` repo. This entry is the source of truth for whether the two claims that
+decision rests on — retained git compatibility, and the operation log as the
+agent-undo primitive — survive contact with the code. Also the study's only
+entry where *conflicts are first-class recorded values* rather than a second
+file with a longer name.
+
+**The thing to read it for.** `StoreFactories` (`lib/src/repo.rs:434-440`) is
+five backends, not one; only `GitBackend` is production-grade and `SimpleBackend`
+is labelled a proof of concept by the maintainers. And a colocated repo splits in
+half: content in `.git/`, but change IDs, predecessors, and the whole operation
+log in `.jj/` — so a git-only recipient gets the document and loses the undo.
+
+Deep write-up: [`context-v/profiles/Profile__Jujutsu.md`](./context-v/profiles/Profile__Jujutsu.md)
+
 
 ## Not in the study, and why
 

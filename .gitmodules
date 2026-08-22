@@ -1,0 +1,3 @@
+[submodule "jj"]
+	path = jj
+	url = https://github.com/jj-vcs/jj.git
