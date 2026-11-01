@@ -43,6 +43,7 @@ tags:
   - Content-Defined-Chunking
   - Open-Core
 publish: true
+type: Profiles
 ---
 
 # Seafile — Profile

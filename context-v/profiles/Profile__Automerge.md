@@ -42,6 +42,7 @@ tags:
   - Collaboration
   - Flave
 publish: true
+type: Profiles
 ---
 
 # Automerge — Profile

@@ -43,6 +43,7 @@ tags:
   - Scheduling
   - Cross-Platform
 publish: true
+type: Profiles
 ---
 
 # Rclone UI — Profile

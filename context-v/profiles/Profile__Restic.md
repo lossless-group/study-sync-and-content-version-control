@@ -42,6 +42,7 @@ tags:
   - Snapshots
   - Corpora-Builder
 publish: true
+type: Profiles
 ---
 
 # restic — Profile

@@ -43,6 +43,7 @@ tags:
   - Policy-Inheritance
   - Corpora-Builder
 publish: true
+type: Profiles
 ---
 
 # Kopia — Profile

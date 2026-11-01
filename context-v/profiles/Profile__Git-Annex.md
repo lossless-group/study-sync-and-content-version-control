@@ -41,6 +41,7 @@ tags:
   - Large-Files
   - Corpus
 publish: true
+type: Profiles
 ---
 
 # git-annex — Profile

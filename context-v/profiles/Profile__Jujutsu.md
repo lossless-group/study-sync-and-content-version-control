@@ -43,6 +43,7 @@ tags:
   - Sync
   - Flave
 publish: true
+type: Profiles
 ---
 
 # Jujutsu (`jj`) — Profile

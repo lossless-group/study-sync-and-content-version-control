@@ -42,6 +42,7 @@ tags:
   - Conflict-Resolution
   - Augment-It
 publish: true
+type: Profiles
 ---
 
 # Syncthing — Profile
